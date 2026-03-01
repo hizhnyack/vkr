@@ -1,0 +1,15 @@
+# Нормализация окончаний строк
+* text=auto eol=lf
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
+
+# Бинарные не трогать
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.mp4 binary
+*.pt binary
+*.pth binary

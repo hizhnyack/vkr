@@ -1,0 +1,98 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# === Виртуальное окружение ===
+venv/
+.venv/
+env/
+.env/
+
+# === IDE и редакторы ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# === Конфиги с секретами (оставляем config_default.yaml в репо) ===
+.env
+.env.local
+.env.*.local
+config_local.yaml
+config_override.yaml
+*.local.yaml
+
+# === Модели и чекпоинты (тяжёлые, качаются отдельно) ===
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+checkpoints/
+models/
+weights/
+hub/
+
+# === Данные и выводы пайплайна ===
+data/
+output/
+outputs/
+results/
+*.mp4
+*.avi
+*.mkv
+!examples/*.mp4
+
+# === Логи и кэш ===
+*.log
+logs/
+.cache/
+.cache_huggingface/
+
+# === Jupyter ===
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# === Тесты и покрытие ===
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# === Системные файлы ===
+.DS_Store
+Thumbs.db
+*.bak
+
+# === Временные файлы ===
+tmp/
+temp/
+*.tmp
+*.temp

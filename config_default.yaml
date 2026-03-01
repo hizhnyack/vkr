@@ -1,0 +1,42 @@
+# Конфигурация пайплайна симуляции дорожных сценариев
+
+# LLM: парсинг текста задачи в структуру сценария
+llm:
+  mode: local  # local | openai | anthropic
+  model_name: Qwen/Qwen2.5-3B-Instruct
+  # Для local: 4-bit для экономии VRAM (8 ГБ)
+  load_in_4bit: true
+  # API (если mode: openai или anthropic)
+  api_key: null
+  api_base: null
+
+# VLM: анализ сцены (время суток, погода)
+vlm:
+  model_name: Salesforce/blip2-opt-2.7b
+  load_in_4bit: true
+
+# Глубина сцены
+depth:
+  model_name: Intel/dpt-hybrid-midas
+
+# Генерация контента (Stable Diffusion + ControlNet)
+diffusion:
+  model_id: runwayml/stable-diffusion-v1-5
+  controlnet_id: lllyasviel/control_v11p_sd15_depth
+  num_inference_steps: 30
+  guidance_scale: 7.5
+  # Макс. разрешение по длинной стороне для экономии VRAM
+  max_resolution: 512
+
+# Video inpainting (опционально, тяжёлая модель)
+inpainting:
+  enabled: false
+  model_path: null
+
+# Устройство
+device: cuda  # cuda | cpu
+
+# Лимиты памяти (подсказки для пайплайна)
+memory:
+  max_vram_gb: 8
+  clear_cache_between_models: true

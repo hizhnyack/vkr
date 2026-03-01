@@ -60,6 +60,8 @@ data/
 output/
 outputs/
 results/
+web/uploads/
+web/outputs/
 *.mp4
 *.avi
 *.mkv

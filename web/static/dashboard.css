@@ -10,13 +10,21 @@
   --timeline-track-bg: #e9ecef;
   --tooltip-bg: rgba(67, 59, 151, 0.95);
   --tooltip-color: #ffffff;
+  /* Шрифты как в bootstrap.css */
+  --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 body {
+  font-family: var(--bs-font-sans-serif);
   font-size: .875rem;
   background-color: #f8f9fa;
   margin: 0;
   padding: 0;
+}
+
+.font-monospace {
+  font-family: var(--bs-font-monospace);
 }
 
 header.navbar.navbar-dark,
@@ -34,7 +42,7 @@ header.navbar.navbar-dark,
   color: #fff !important;
 }
 
-/* Боковое меню */
+/* Боковое меню — как в bootstrap-5.0.2-examples/dashboard */
 .sidebar {
   position: fixed;
   top: 0;
@@ -42,9 +50,19 @@ header.navbar.navbar-dark,
   left: 0;
   z-index: 100;
   padding: 48px 0 0;
-  box-shadow: inset -1px 0 0 var(--card-border);
-  max-width: 11rem;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+  width: 11rem;
   background-color: var(--sidebar-bg) !important;
+}
+
+/* Основной контент не перекрывается сайдбаром */
+.main-content {
+  margin-left: 0;
+}
+@media (min-width: 768px) {
+  .main-content {
+    margin-left: 11rem;
+  }
 }
 
 .sidebar-inner {
@@ -108,11 +126,13 @@ header.navbar.navbar-dark,
 .btn-primary {
   background-color: var(--primary-color) !important;
   border-color: var(--primary-color) !important;
+  color: #fff !important;
 }
 
 .btn-primary:hover {
   background-color: #352d7a !important;
   border-color: #352d7a !important;
+  color: #fff !important;
 }
 
 .btn-outline-secondary:hover {
@@ -131,11 +151,17 @@ header.navbar.navbar-dark,
   box-shadow: 0 0 0 0.2rem rgba(67, 59, 151, 0.15);
 }
 
+/* Прогресс-бар задачи — в цвете темы */
+#progress-wrap .progress-bar {
+  background-color: var(--primary-color);
+}
+
 /* Лог */
 #log-container {
   height: 320px;
   overflow-y: scroll;
   overflow-x: auto;
+  font-family: var(--bs-font-monospace);
   font-size: 0.8rem;
   white-space: pre-wrap;
   word-break: break-all;

@@ -69,6 +69,21 @@ def _get_logs(tail: int = 200) -> list[str]:
         return list(_log_buffer)[-tail:]
 
 
+def _clear_logs() -> None:
+    """Очищает буфер логов и файл лога на сервере."""
+    global _log_file
+    with _log_lock:
+        _log_buffer.clear()
+        if _log_file is not None:
+            try:
+                _log_file.seek(0)
+                _log_file.truncate()
+                _log_file.write(f"--- Сессия очищена {datetime.now().isoformat()} ---\n")
+                _log_file.flush()
+            except OSError:
+                pass
+
+
 def _run_pipeline(job_id: str, video_path: Path, task_text: str, output_path: Path) -> None:
     with _jobs_lock:
         _jobs[job_id]["status"] = "running"
@@ -222,6 +237,12 @@ def api_logs():
     if job_id:
         lines = [ln for ln in lines if f"[{job_id}]" in ln]
     return jsonify({"lines": lines})
+
+
+@app.post("/api/logs/clear")
+def api_logs_clear():
+    _clear_logs()
+    return jsonify({"ok": True})
 
 
 @app.get("/api/report/<job_id>")

@@ -12,8 +12,9 @@ if ! command -v python3 &>/dev/null; then
   exit 1
 fi
 
-# Виртуальное окружение
-if [ ! -d "venv" ]; then
+# Виртуальное окружение (создаём, если нет или битый)
+if [ ! -f "venv/bin/activate" ]; then
+  rm -rf venv
   python3 -m venv venv
   echo "Создано виртуальное окружение venv"
 fi

@@ -135,15 +135,22 @@ def parse_task_text(
     else:
         raw = _call_local_llm(llm_model, prompt, config)
 
-    json_str = _extract_json_from_response(raw)
+    json_str = _extract_json_from_response(raw or "")
+    if not json_str or not json_str.strip():
+        logger.warning("LLM вернул пустой ответ, используем запасной сценарий")
+        return _fallback_scenario_from_text(task_text)
+
     try:
         data = json.loads(json_str)
     except json.JSONDecodeError as e:
         logger.warning("LLM вернул невалидный JSON, пробуем исправить: %s", e)
-        # Попытка починить типичные ошибки
         json_str = re.sub(r",\s*}", "}", json_str)
         json_str = re.sub(r",\s*]", "]", json_str)
-        data = json.loads(json_str)
+        try:
+            data = json.loads(json_str)
+        except json.JSONDecodeError:
+            logger.warning("Исправление не помогло, используем запасной сценарий")
+            return _fallback_scenario_from_text(task_text)
 
     return _parse_llm_json_to_scenario(data, raw_text=task_text.strip())
 

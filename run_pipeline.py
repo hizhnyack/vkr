@@ -26,6 +26,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger("pipeline")
+# Меньше шума от библиотек загрузки моделей
+for _name in ("diffusers", "transformers", "httpx"):
+    logging.getLogger(_name).setLevel(logging.WARNING)
 
 
 def main():

@@ -18,6 +18,10 @@
   const pipelineStageUnknown = document.getElementById("pipeline-stage-unknown");
   const reportWrap = document.getElementById("report-wrap");
 
+  const LOG_POLL_INTERVAL_MS = 3000;
+  const STATUS_POLL_INTERVAL_MS = 2000;
+  let statusPollTimer = null;
+
   const PIPELINE_STAGES = [
     "Метаданные и кадры (ffprobe/decord)",
     "LLM: текст → JSON сценария",
@@ -31,25 +35,40 @@
     "Разметка (YOLO)"
   ];
 
+  var pipelineMaxStageIndex = -1;
+
   function renderPipelineStages(currentStageText, allDone) {
-    var currentIndex = (!allDone && currentStageText) ? PIPELINE_STAGES.indexOf(currentStageText) : -1;
-    if (allDone) currentIndex = PIPELINE_STAGES.length;
-    pipelineStageIdle.classList.add("d-none");
     pipelineStageUnknown.classList.add("d-none");
+    if (allDone) {
+      pipelineMaxStageIndex = PIPELINE_STAGES.length - 1;
+    } else if (currentStageText) {
+      var idx = PIPELINE_STAGES.indexOf(currentStageText);
+      if (idx !== -1 && idx > pipelineMaxStageIndex) {
+        pipelineMaxStageIndex = idx;
+      }
+    }
+    if (pipelineMaxStageIndex < 0) {
+      pipelineStageIdle.classList.remove("d-none");
+      pipelineStageList.classList.add("d-none");
+      pipelineStageList.innerHTML = "";
+      return;
+    }
+    pipelineStageIdle.classList.add("d-none");
     pipelineStageList.classList.remove("d-none");
     pipelineStageList.innerHTML = "";
-    PIPELINE_STAGES.forEach(function (label, i) {
+    pipelineStageList.style.counterReset = "step 0";
+    for (var i = 0; i <= pipelineMaxStageIndex && i < PIPELINE_STAGES.length; i++) {
       var li = document.createElement("li");
-      li.className = "list-group-item list-group-item-action py-1 small";
-      li.textContent = label;
-      if (i < currentIndex) {
-        li.classList.add("list-group-item-success");
-      } else if (i === currentIndex && !allDone) {
-        li.classList.add("list-group-item-primary", "fw-bold");
+      li.className = "pipeline-step";
+      li.textContent = PIPELINE_STAGES[i];
+      if (allDone || i < pipelineMaxStageIndex) {
+        li.classList.add("step-done");
+      } else {
+        li.classList.add("step-current");
       }
       pipelineStageList.appendChild(li);
-    });
-    if (!allDone && currentStageText && currentIndex === -1) {
+    }
+    if (!allDone && currentStageText && PIPELINE_STAGES.indexOf(currentStageText) === -1) {
       pipelineStageUnknown.textContent = "Текущий: " + currentStageText;
       pipelineStageUnknown.classList.remove("d-none");
     }
@@ -60,13 +79,15 @@
     jobIdEl.textContent = jobId;
     statusTextEl.textContent = "ожидание…";
     downloadWrap.classList.add("d-none");
+    downloadLink.removeAttribute("href");
     errorWrap.classList.add("d-none");
     errorWrap.textContent = "";
     reportWrap.classList.add("d-none");
     reportWrap.innerHTML = "";
-    pipelineStageIdle.classList.add("d-none");
-    pipelineStageList.classList.remove("d-none");
-    renderPipelineStages(null);
+    pipelineMaxStageIndex = -1;
+    pipelineStageIdle.classList.remove("d-none");
+    pipelineStageList.classList.add("d-none");
+    pipelineStageList.innerHTML = "";
   }
 
   function updateStatus(data) {
@@ -76,9 +97,11 @@
     } else if (data.stage !== undefined) {
       renderPipelineStages(data.stage);
     }
-    if (data.status === "done" && data.download_url) {
+    if (data.status === "done" && data.job_id) {
       downloadWrap.classList.remove("d-none");
-      downloadLink.href = data.download_url;
+      var downloadUrl = data.download_url || (window.location.pathname.replace(/\/?$/, "") + "/download/" + encodeURIComponent(data.job_id));
+      downloadLink.href = downloadUrl;
+      downloadLink.setAttribute("download", "result_" + data.job_id + ".mp4");
       if (statusPollTimer) {
         clearInterval(statusPollTimer);
         statusPollTimer = null;

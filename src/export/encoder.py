@@ -6,8 +6,8 @@ from typing import Iterator, List
 
 import numpy as np
 
-from ..video_io.metadata import VideoMetadata
-from ..video_io.writer import VideoWriter
+from video_io.metadata import VideoMetadata
+from video_io.writer import VideoWriter
 
 
 def export_video(

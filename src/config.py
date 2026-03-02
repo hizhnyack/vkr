@@ -27,7 +27,7 @@ class DepthConfig(BaseModel):
 
 class DiffusionConfig(BaseModel):
     model_id: str = "runwayml/stable-diffusion-v1-5"
-    controlnet_id: str = "lllyasviel/control_v11p_sd15_depth"
+    controlnet_id: str = "lllyasviel/control_v11f1p_sd15_depth"
     num_inference_steps: int = 30
     guidance_scale: float = 7.5
     max_resolution: int = 512

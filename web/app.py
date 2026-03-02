@@ -12,6 +12,7 @@ import sys
 import threading
 import uuid
 from collections import deque
+from datetime import datetime
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_file, url_for
@@ -26,10 +27,26 @@ CONFIG_PATH = ROOT / "config_default.yaml"
 LOG_MAX_LINES = 500
 MAX_CONTENT_MB = 500
 ALLOWED_EXTENSIONS = {"mp4", "mkv", "mpeg", "avi"}
+LOG_FILE_PATH = ROOT / "pipeline.log"
 
 # Лог-буфер в памяти (последние N строк)
 _log_buffer: deque = deque(maxlen=LOG_MAX_LINES)
 _log_lock = threading.Lock()
+_log_file = None
+
+
+def _init_log_file() -> None:
+    global _log_file
+    try:
+        _log_file = open(LOG_FILE_PATH, "w", encoding="utf-8")
+        _log_file.write(f"--- Сессия запущена {datetime.now().isoformat()} ---\n")
+        _log_file.flush()
+    except OSError as e:
+        logging.warning("Не удалось открыть файл логов %s: %s", LOG_FILE_PATH, e)
+        _log_file = None
+
+
+_init_log_file()
 # Состояние задач: job_id -> { "status": "pending"|"running"|"done"|"error", "output_path": Path|None, "error": str|None }
 _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
@@ -38,6 +55,12 @@ _jobs_lock = threading.Lock()
 def _append_log(line: str) -> None:
     with _log_lock:
         _log_buffer.append(line)
+        if _log_file is not None:
+            try:
+                _log_file.write(line + "\n")
+                _log_file.flush()
+            except OSError:
+                pass
 
 
 def _get_logs(tail: int = 200) -> list[str]:

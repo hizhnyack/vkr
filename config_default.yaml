@@ -22,7 +22,7 @@ depth:
 # Генерация контента (Stable Diffusion + ControlNet)
 diffusion:
   model_id: runwayml/stable-diffusion-v1-5
-  controlnet_id: lllyasviel/control_v11p_sd15_depth
+  controlnet_id: lllyasviel/control_v11f1p_sd15_depth
   num_inference_steps: 30
   guidance_scale: 7.5
   # Макс. разрешение по длинной стороне для экономии VRAM

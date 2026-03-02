@@ -181,7 +181,8 @@ def _call_local_llm(model, prompt: str, config: Optional[object]) -> str:
 
 
 def _load_local_llm(config: Optional[object]):
-    """Загрузить локальную LLM (4-bit при необходимости)."""
+    """Загрузить локальную LLM (4-bit при необходимости; при нехватке VRAM — без квантизации)."""
+    import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
     cfg = getattr(config, "llm", None) or object()
@@ -196,12 +197,29 @@ def _load_local_llm(config: Optional[object]):
             bnb_4bit_compute_dtype="float16",
             bnb_4bit_quant_type="nf4",
         )
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        quantization_config=quantization,
-        device_map="auto" if device == "cuda" else None,
-        trust_remote_code=True,
-    )
+    device_map = "auto" if device == "cuda" else None
+    try:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            quantization_config=quantization,
+            device_map=device_map,
+            trust_remote_code=True,
+        )
+    except ValueError as e:
+        if "CPU or the disk" in str(e) or "quantized model" in str(e):
+            logger.warning(
+                "Недостаточно VRAM для 4-bit квантизации, загружаем модель без квантизации (float16): %s",
+                e,
+            )
+            model = AutoModelForCausalLM.from_pretrained(
+                model_name,
+                quantization_config=None,
+                device_map=device_map,
+                torch_dtype=torch.float16 if device == "cuda" else torch.float32,
+                trust_remote_code=True,
+            )
+        else:
+            raise
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     if device == "cpu" and quantization is None:
         model = model.to("cpu")

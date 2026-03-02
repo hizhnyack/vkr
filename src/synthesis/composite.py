@@ -17,6 +17,24 @@ except ImportError:
     HAS_CV2 = False
 
 
+def _draw_bbox_border(out: np.ndarray, x1: int, y1: int, x2: int, y2: int, color: tuple, thickness: int) -> None:
+    """Отрисовать рамку по границе bbox (для отладки). Изменяет out на месте."""
+    h, w = out.shape[0], out.shape[1]
+    t = min(thickness, (x2 - x1) // 2, (y2 - y1) // 2)
+    if t <= 0:
+        return
+    # Внешние границы bbox
+    y1a, y2a = max(0, y1), min(h, y2)
+    x1a, x2a = max(0, x1), min(w, x2)
+    c = np.array(color, dtype=out.dtype)
+    if out.ndim == 3:
+        c = c.reshape(1, 1, -1)
+    out[y1a : y1a + t, x1a:x2a] = c
+    out[y2a - t : y2a, x1a:x2a] = c
+    out[y1a:y2a, x1a : x1a + t] = c
+    out[y1a:y2a, x2a - t : x2a] = c
+
+
 def _color_match_region(source: np.ndarray, target_region: np.ndarray, mask: np.ndarray) -> np.ndarray:
     """Подогнать среднее и std source к target_region в области mask."""
     if source.shape != target_region.shape:
@@ -39,8 +57,17 @@ def _color_match_region(source: np.ndarray, target_region: np.ndarray, mask: np.
 class CompositePipeline:
     """Наложение сгенерированного контента на кадры по маскам/bbox с опциональным color matching."""
 
-    def __init__(self, use_color_matching: bool = True):
+    def __init__(
+        self,
+        use_color_matching: bool = True,
+        debug_draw_border: bool = False,
+        debug_border_color: tuple = (255, 0, 0),
+        debug_border_thickness: int = 3,
+    ):
         self.use_color_matching = use_color_matching
+        self.debug_draw_border = debug_draw_border
+        self.debug_border_color = debug_border_color
+        self.debug_border_thickness = debug_border_thickness
 
     def composite_frame(
         self,
@@ -97,6 +124,12 @@ class CompositePipeline:
             else:
                 m = m.astype(np.float32) / 255.0
             out[y1:y2, x1:x2] = out[y1:y2, x1:x2] * (1 - m) + patch.astype(np.float32) * m
+            if self.debug_draw_border:
+                _draw_bbox_border(
+                    out, x1, y1, x2, y2,
+                    self.debug_border_color,
+                    self.debug_border_thickness,
+                )
         return np.clip(out, 0, 255).astype(np.uint8)
 
     def run(

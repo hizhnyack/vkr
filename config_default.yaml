@@ -28,6 +28,13 @@ diffusion:
   # Макс. разрешение по длинной стороне для экономии VRAM
   max_resolution: 512
 
+# Композитинг: подгонка цвета патча под фон (false = вставки заметнее)
+# debug_draw_border: на период отладки — красная рамка вокруг сгенерированной области
+composite:
+  use_color_matching: false
+  debug_draw_border: true
+  debug_border_thickness: 3
+
 # Video inpainting (опционально, тяжёлая модель)
 inpainting:
   enabled: false

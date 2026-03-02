@@ -33,6 +33,13 @@ class DiffusionConfig(BaseModel):
     max_resolution: int = 512
 
 
+class CompositeConfig(BaseModel):
+    """Композитинг: наложение патчей с подгонкой цвета (отключено по умолчанию для заметности вставок)."""
+    use_color_matching: bool = False
+    debug_draw_border: bool = True  # на период отладки: рамка вокруг сгенерированной области
+    debug_border_thickness: int = 3
+
+
 class InpaintingConfig(BaseModel):
     enabled: bool = False
     model_path: Optional[str] = None
@@ -48,6 +55,7 @@ class Config(BaseModel):
     vlm: VLMConfig = Field(default_factory=VLMConfig)
     depth: DepthConfig = Field(default_factory=DepthConfig)
     diffusion: DiffusionConfig = Field(default_factory=DiffusionConfig)
+    composite: CompositeConfig = Field(default_factory=CompositeConfig)
     inpainting: InpaintingConfig = Field(default_factory=InpaintingConfig)
     device: str = "cuda"
     memory: MemoryConfig = Field(default_factory=MemoryConfig)

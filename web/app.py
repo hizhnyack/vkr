@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import subprocess
@@ -92,6 +93,10 @@ def _run_pipeline(job_id: str, video_path: Path, task_text: str, output_path: Pa
         )
         for line in proc.stdout:
             line = line.rstrip()
+            if "[PIPELINE_STAGE]" in line:
+                stage_text = line.split("[PIPELINE_STAGE]", 1)[-1].strip()
+                with _jobs_lock:
+                    _jobs[job_id]["stage"] = stage_text
             _append_log(f"[{job_id}] {line}")
         proc.wait()
         if proc.returncode != 0:
@@ -182,7 +187,7 @@ def run():
         return jsonify({"error": "Не удалось сохранить файл"}), 500
 
     with _jobs_lock:
-        _jobs[job_id] = {"status": "pending", "output_path": None, "error": None}
+        _jobs[job_id] = {"status": "pending", "output_path": None, "error": None, "stage": None}
 
     thread = threading.Thread(target=_run_pipeline, args=(job_id, upload_path, task_text, output_path))
     thread.daemon = True
@@ -199,6 +204,8 @@ def api_status(job_id: str):
         job = _jobs[job_id].copy()
     status = job["status"]
     out = {"job_id": job_id, "status": status}
+    if job.get("stage") is not None:
+        out["stage"] = job["stage"]
     if status == "done" and job.get("output_path"):
         out["download_url"] = url_for("download", job_id=job_id, _external=False)
     if status == "error" and job.get("error"):
@@ -215,6 +222,25 @@ def api_logs():
     if job_id:
         lines = [ln for ln in lines if f"[{job_id}]" in ln]
     return jsonify({"lines": lines})
+
+
+@app.get("/api/report/<job_id>")
+def api_report(job_id: str):
+    with _jobs_lock:
+        if job_id not in _jobs or _jobs[job_id]["status"] != "done":
+            return jsonify({"error": "Задача не найдена или не завершена"}), 404
+        output_path = _jobs[job_id].get("output_path")
+    if not output_path:
+        return jsonify({"error": "Нет пути к результату"}), 404
+    path = Path(output_path)
+    report_path = path.parent / (path.name + ".report.json")
+    if not report_path.exists():
+        return jsonify({"error": "Отчёт не найден"}), 404
+    try:
+        data = json.loads(report_path.read_text(encoding="utf-8"))
+    except Exception:
+        return jsonify({"error": "Ошибка чтения отчёта"}), 500
+    return jsonify(data)
 
 
 @app.get("/download/<job_id>")

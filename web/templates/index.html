@@ -36,7 +36,17 @@
             <a id="download-link" href="#" class="btn btn-success btn-sm">Скачать результат</a>
           </div>
           <div id="error-wrap" class="d-none text-danger small mt-1"></div>
+        <div id="report-wrap" class="d-none mt-2"></div>
         </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4" id="pipeline-stage-card">
+      <div class="card-header">Текущий этап пайплайна</div>
+      <div class="card-body py-2">
+        <p id="pipeline-stage-idle" class="text-muted small mb-0">Ожидание задачи</p>
+        <ol id="pipeline-stage-list" class="list-group list-group-numbered list-group-flush d-none mb-0"></ol>
+        <p id="pipeline-stage-unknown" class="small mb-0 d-none"></p>
       </div>
     </div>
 

@@ -71,13 +71,17 @@
   }
 
   function loadLogs() {
-    fetch("/api/logs?tail=200")
+    var wasAtBottom = (logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight) < 20;
+    fetch("/api/logs?tail=500")
       .then(function (r) { return r.json(); })
       .then(function (data) {
         logContainer.textContent = (data.lines && data.lines.length)
           ? data.lines.join("\n")
           : "(логов пока нет)";
-        logContainer.scrollTop = logContainer.scrollHeight;
+        var hasSelection = window.getSelection().toString().length > 0;
+        if (wasAtBottom && !hasSelection) {
+          logContainer.scrollTop = logContainer.scrollHeight;
+        }
       })
       .catch(function () {
         logContainer.textContent = "Не удалось загрузить логи.";

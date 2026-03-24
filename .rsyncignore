@@ -1,0 +1,21 @@
+# .rsyncignore
+.git/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+venv/
+.venv/
+env/
+*.log
+logs/
+outputs/
+*.mp4
+*.avi
+*.mov
+*.mkv
+.cache/
+*.tmp
+.DS_Store
+Thumbs.db

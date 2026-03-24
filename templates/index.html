@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Генерация видео по промпту</title>
+  <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/app.css" rel="stylesheet">
+</head>
+<body>
+  <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="/">Генерация видео по промпту</a>
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Меню">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-nav w-100 justify-content-end">
+      <span class="nav-link px-3 text-white-50">T2V Pipeline</span>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav id="sidebarMenu" class="col-md-2 col-lg-2 d-md-block bg-light sidebar collapse">
+        <div class="position-sticky pt-3">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="#main" data-bs-target="#main" data-bs-toggle="tab">Генерация</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/analytics">Аналитика</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+        <div class="tab-content pt-3">
+          <div class="tab-pane fade show active" id="main">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+              <h1 class="h2">Генерация видео 10–15 сек по текстовому описанию</h1>
+            </div>
+
+            <div class="card mb-4">
+              <div class="card-header">Промпт</div>
+              <div class="card-body">
+                <label class="form-label">Опишите сценарий на русском</label>
+                <textarea class="form-control" id="prompt-input" rows="3" placeholder="Например: ДТП с фурой — столкновение, разворот через сплошную, потеря груза."></textarea>
+                <div class="mt-2">
+                  <button type="button" class="btn btn-primary" id="btn-generate">Сгенерировать</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-4">
+              <div class="card-header">Модель</div>
+              <div class="card-body">
+                <label class="form-label">Выберите модель (от лёгкой к тяжёлой)</label>
+                <select class="form-select" id="model-select">
+                </select>
+                <p class="form-text text-muted mt-1" id="model-description">—</p>
+              </div>
+            </div>
+
+            <div class="card mb-4">
+              <div class="card-header">Статус</div>
+              <div class="card-body">
+                <p class="mb-2"><span class="badge bg-secondary" id="status-badge">Ожидание</span></p>
+                <div class="progress mb-2" style="height: 1.5rem;">
+                  <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-4">
+              <div class="card-header">Лог</div>
+              <div class="card-body">
+                <pre class="log-area mb-0" id="log-area"></pre>
+              </div>
+            </div>
+
+            <div class="card mb-4" id="result-card" style="display: none;">
+              <div class="card-header">Результат</div>
+              <div class="card-body">
+                <video id="result-video" controls class="w-100 mb-3" style="max-height: 400px;"></video>
+                <a href="#" class="btn btn-primary" id="btn-download">Скачать видео</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

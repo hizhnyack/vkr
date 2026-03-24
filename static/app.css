@@ -1,0 +1,135 @@
+/* Стили приложения генерации видео — по образцу static-example/dashboard.css */
+:root {
+  --header-bg: #433b97;
+  --table-header: #958ac2;
+  --striped-odd: #f8f9fa;
+  --striped-even: #c7bedd55;
+  --primary-color: #433b97;
+  --sidebar-bg: #f8f9fa;
+  --card-border: #dee2e6;
+  --tooltip-bg: rgba(67, 59, 151, 0.95);
+  --tooltip-color: #ffffff;
+}
+
+body {
+  font-size: .875rem;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+header.navbar.navbar-dark,
+.navbar.bg-dark {
+  background-color: var(--header-bg) !important;
+  box-shadow: 0 2px 8px rgba(67, 59, 151, 0.2);
+}
+
+.navbar-brand {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  font-size: 1rem;
+  background-color: rgba(0, 0, 0, .2);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.15);
+  color: #fff !important;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 48px 0 0;
+  box-shadow: inset -1px 0 0 var(--card-border);
+  max-width: 11rem;
+  background-color: var(--sidebar-bg) !important;
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    top: 5rem;
+  }
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #495057;
+  border-radius: 0.25rem;
+  margin: 0 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+  color: var(--primary-color);
+  background-color: rgba(67, 59, 151, 0.08);
+}
+
+.sidebar .nav-link.active {
+  color: var(--primary-color);
+  background-color: rgba(67, 59, 151, 0.12);
+}
+
+.sidebar.sidebar-violet {
+  background-color: var(--header-bg) !important;
+}
+
+.sidebar.sidebar-violet .nav-link {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sidebar.sidebar-violet .nav-link:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar.sidebar-violet .nav-link.active {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.card {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+  background-color: var(--table-header);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-primary:hover {
+  background-color: #352d7a !important;
+  border-color: #352d7a !important;
+}
+
+.card .form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(67, 59, 151, 0.15);
+}
+
+.log-area {
+  font-size: 0.8rem;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1rem;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+#result-video {
+  border-radius: 8px;
+  background: #000;
+}

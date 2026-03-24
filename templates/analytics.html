@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Аналитика генераций</title>
+  <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/app.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="/">Генерация видео по промпту</a>
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Меню">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-nav w-100 justify-content-end">
+      <a class="nav-link px-3" href="/">Генерация</a>
+      <span class="nav-link px-3 text-white-50">Аналитика</span>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav id="sidebarMenu" class="col-md-2 col-lg-2 d-md-block bg-light sidebar sidebar-violet collapse">
+        <div class="position-sticky pt-3">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Генерация</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/analytics">Аналитика</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+        <div class="pt-3">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Аналитика генераций</h1>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header">Среднее время генерации по моделям (сек)</div>
+                <div class="card-body">
+                  <canvas id="chart-by-model" height="250"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header">Среднее время генерации по видеокартам (сек)</div>
+                <div class="card-body">
+                  <canvas id="chart-by-gpu" height="250"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">Последние генерации (модель × GPU × время)</div>
+            <div class="card-body overflow-auto">
+              <table class="table table-sm table-striped" id="table-rows">
+                <thead>
+                  <tr>
+                    <th>Модель</th>
+                    <th>GPU</th>
+                    <th>VRAM (GB)</th>
+                    <th>Пик VRAM (ГБ)</th>
+                    <th>Пик VRAM (%)</th>
+                    <th>Время (сек)</th>
+                    <th>s/it (средн.)</th>
+                    <th>Кадров</th>
+                    <th>Разрешение</th>
+                    <th>Сегментов</th>
+                    <th>Дата</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script>
+(function () {
+  function api(path) {
+    return fetch(path).then(function (r) {
+      if (!r.ok) throw new Error(r.statusText);
+      return r.json();
+    });
+  }
+
+  api('/api/analytics/stats').then(function (data) {
+    var byModel = data.by_model || [];
+    var byGpu = data.by_gpu || [];
+    var rows = data.rows || [];
+
+    new Chart(document.getElementById('chart-by-model'), {
+      type: 'bar',
+      data: {
+        labels: byModel.map(function (m) { return m.model_id; }),
+        datasets: [{
+          label: 'Среднее время (сек)',
+          data: byModel.map(function (m) { return Math.round(m.avg_duration * 10) / 10; }),
+          backgroundColor: 'rgba(54, 162, 235, 0.6)'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    new Chart(document.getElementById('chart-by-gpu'), {
+      type: 'bar',
+      data: {
+        labels: byGpu.map(function (g) { return g.gpu_name || '—'; }),
+        datasets: [{
+          label: 'Среднее время (сек)',
+          data: byGpu.map(function (g) { return Math.round(g.avg_duration * 10) / 10; }),
+          backgroundColor: 'rgba(255, 99, 132, 0.6)'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    var tbody = document.querySelector('#table-rows tbody');
+    rows.forEach(function (r) {
+      var tr = document.createElement('tr');
+      var peakGb = (r.vram_peak_gb != null && r.vram_peak_gb > 0) ? r.vram_peak_gb.toFixed(1) : '—';
+      var peakPct = (r.vram_peak_pct != null && r.vram_peak_pct > 0) ? r.vram_peak_pct.toFixed(1) + '%' : '—';
+      var sPerIt = (r.avg_s_per_it != null && r.avg_s_per_it > 0) ? r.avg_s_per_it.toFixed(2) : '—';
+      var frames = (r.num_frames != null && r.num_frames > 0) ? r.num_frames : '—';
+      var res = (r.video_width != null && r.video_height != null && r.video_width > 0) ? (r.video_width + '×' + r.video_height) : '—';
+      tr.innerHTML = '<td>' + (r.model_id || '—') + '</td><td>' + (r.gpu_name || '—') + '</td><td>' + (r.vram_gb != null ? r.vram_gb.toFixed(1) : '—') + '</td><td>' + peakGb + '</td><td>' + peakPct + '</td><td>' + (r.duration_sec != null ? r.duration_sec.toFixed(1) : '—') + '</td><td>' + sPerIt + '</td><td>' + frames + '</td><td>' + res + '</td><td>' + (r.num_segments != null ? r.num_segments : '—') + '</td><td>' + (r.created_at || '—') + '</td>';
+      tbody.appendChild(tr);
+    });
+  }).catch(function () {
+    document.querySelector('#chart-by-model').parentElement.innerHTML = '<p class="text-muted">Нет данных</p>';
+    document.querySelector('#chart-by-gpu').parentElement.innerHTML = '<p class="text-muted">Нет данных</p>';
+  });
+})();
+  </script>
+</body>
+</html>

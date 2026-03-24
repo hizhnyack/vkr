@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Tooling / IDE
+.idea/
+.vscode/
+.cursor/
+
+# Runtime artifacts
+outputs/
+*.log
+analytics.db
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+Thumbs.db
